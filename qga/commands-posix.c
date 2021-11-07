@@ -90,9 +90,17 @@ void qmp_guest_shutdown(bool has_mode, const char *mode, Error **errp)
 
     slog("guest-shutdown called, mode: %s", mode);
     if (!has_mode || strcmp(mode, "powerdown") == 0) {
+        #ifdef __APPLE__
+        shutdown_flag = "-h";
+        #else
         shutdown_flag = "-P";
+        #endif
     } else if (strcmp(mode, "halt") == 0) {
+        #ifdef __APPLE__
+        shutdown_flag = "-u";
+        #else
         shutdown_flag = "-H";
+        #endif
     } else if (strcmp(mode, "reboot") == 0) {
         shutdown_flag = "-r";
     } else {
@@ -109,7 +117,11 @@ void qmp_guest_shutdown(bool has_mode, const char *mode, Error **errp)
         reopen_fd_to_null(1);
         reopen_fd_to_null(2);
 
-        execle("/sbin/shutdown", "shutdown", "-h", shutdown_flag, "+0",
+        execle("/sbin/shutdown", "shutdown",
+               #ifndef __APPLE__
+               "-h",
+               #endif
+               shutdown_flag, "+0",
                "hypervisor initiated shutdown", (char *)NULL, environ);
         _exit(EXIT_FAILURE);
     } else if (pid < 0) {
