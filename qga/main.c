@@ -46,9 +46,14 @@
 #endif
 
 #ifndef _WIN32
+#ifdef __APPLE__
+#define QGA_VIRTIO_PATH_DEFAULT "/dev/tty.org.qemu.guest_agent.0"
+#define QGA_SERIAL_PATH_DEFAULT "/dev/tty.serial1"
+#else
 #define QGA_VIRTIO_PATH_DEFAULT "/dev/virtio-ports/org.qemu.guest_agent.0"
-#define QGA_STATE_RELATIVE_DIR  "run"
 #define QGA_SERIAL_PATH_DEFAULT "/dev/ttyS0"
+#endif
+#define QGA_STATE_RELATIVE_DIR  "run"
 #else
 #define QGA_VIRTIO_PATH_DEFAULT "\\\\.\\Global\\org.qemu.guest_agent.0"
 #define QGA_STATE_RELATIVE_DIR  "qemu-ga"
