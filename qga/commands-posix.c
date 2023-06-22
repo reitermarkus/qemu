@@ -107,6 +107,11 @@ void qmp_guest_shutdown(const char *mode, Error **errp)
         return;
     }
 
+    if (mode && strcmp(mode, "powerdown") != 0) {
+        error_setg(errp, "mode is not supported on Talos: %s", mode);
+        return;
+    }
+
     pid = fork();
     if (pid == 0) {
         /* child, start the shutdown */
@@ -122,8 +127,8 @@ void qmp_guest_shutdown(const char *mode, Error **errp)
         execl("/sbin/shutdown", "shutdown", shutdown_flag, "+0",
                "hypervisor initiated shutdown", (char *)NULL);
 #else
-        execl("/sbin/shutdown", "shutdown", "-h", shutdown_flag, "+0",
-               "hypervisor initiated shutdown", (char *)NULL);
+        (void)shutdown_flag;
+        execl("/sbin/poweroff", "poweroff", (char *)NULL);
 #endif
         _exit(EXIT_FAILURE);
     } else if (pid < 0) {
